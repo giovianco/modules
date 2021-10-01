@@ -6,7 +6,7 @@ SUFAM_ENV = $(HOME)/share/usr/anaconda-envs/sufam-dev
 SUFAM_OPTS = --format sufam --mpileup-parameters='-A -q 15 -Q 15 -d 15000'
 
 
-sufam: $(foreach sample,$(SAMPLES),vcf/$(ssample).txt)
+sufam: $(foreach sample,$(SAMPLES),vcf/$(sample).txt)
 
 define sufam-genotype
 vcf/$1.txt : bam/$1.bam
