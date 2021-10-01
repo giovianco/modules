@@ -1,6 +1,6 @@
-LOGDIR = log/sufam_ss.$(NOW)
-
 include modules/Makefile.inc
+
+LOGDIR = log/sufam.$(NOW)
 
 SUFAM_ENV = $(HOME)/share/usr/anaconda-envs/sufam-dev
 SUFAM_OPTS = --format vcf --mpileup-parameters='-A -q 15 -Q 15 -d 15000'
