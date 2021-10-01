@@ -9,7 +9,7 @@ SUFAM_OPTS = --format sufam --mpileup-parameters='-A -q 15 -Q 15 -d 15000'
 sufam: $(foreach sample,$(SAMPLES),vcf/$(sample).txt)
 
 define sufam-genotype
-vcf/$1.txt : bam/$1.bam
+vcf/$1.txt : vcf/$1.vcf bam/$1.bam
 	$$(call RUN, -c -s 2G -m 3G -v $$(SUFAM_ENV),"sufam --sample_name $1 $$(SUFAM_OPTS) $$(REF_FASTA) $$(^) > $$(@)")
 
 endef
