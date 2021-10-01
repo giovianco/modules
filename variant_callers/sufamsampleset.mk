@@ -3,14 +3,14 @@ include modules/Makefile.inc
 LOGDIR = log/sufam.$(NOW)
 
 SUFAM_ENV = $(HOME)/share/usr/anaconda-envs/sufam-dev
-SUFAM_OPTS = --format vcf --mpileup-parameters='-A -q 15 -Q 15 -d 15000'
+SUFAM_OPTS = --format sufam --mpileup-parameters='-A -q 15 -Q 15 -d 15000'
 
 
-sufam: $(foreach sample,$(SAMPLES),vcf/$(ssample).sufam.txt)
+sufam: $(foreach sample,$(SAMPLES),vcf/$(ssample).txt)
 
 define sufam-genotype
-vcf/$1.sufam.vcf : sufam/$1.set.vcf $$(foreach sample,$$(set.$1),bam/$$(sample).bam)
-	$$(call RUN,-v $$(SUFAM_ENV) -s 2G -m 3G,"sufam --sample_name $$(set.$1) $$(SUFAM_OPTS) $$(REF_FASTA) $$^ > $$@")
+vcf/$1.txt : vcf/$1.vcf bam/$1.bam
+	$$(call RUN, -c -s 2G -m 3G -v $$(SUFAM_ENV),"sufam --sample_name $1 $$(SUFAM_OPTS) $$(REF_FASTA) $$(^) > $$(@)")
 
 endef
 $(foreach sample,$(SAMPLES),\
