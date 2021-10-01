@@ -3,7 +3,7 @@ include modules/Makefile.inc
 LOGDIR = log/sufam.$(NOW)
 
 SUFAM_ENV = $(HOME)/share/usr/anaconda-envs/sufam-dev
-SUFAM_OPTS = --format sufam --mpileup-parameters='-A -q 15 -Q 15 -d 15000'
+SUFAM_OPTS = --format sufam --mpileup-parameters='-A -B -d 0'
 
 
 sufam: $(foreach sample,$(SAMPLES),vcf/$(sample).txt)
