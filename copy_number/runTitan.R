@@ -64,7 +64,6 @@ if (length(arguments$args) < 1) {
     stop();
 }
 
-# fix this function so that it works on data frames
 filterData <- function (data, chrs = NULL, minDepth = 10, maxDepth = 200, positionList = NULL,
                         map = NULL, mapThres = 0.9, centromeres = NULL, centromere.flankLength = 0) {
     if (!is.null(map)) {
@@ -99,11 +98,7 @@ filterData <- function (data, chrs = NULL, minDepth = 10, maxDepth = 200, positi
     return(data)
 }
 
-
-#options(cores = opt$numCores)
 registerDoMC(opt$numCores)
-
-#pg <- openPage(paste(opt$outPrefix, '_titan_report_', opt$numClusters, '.html', sep = ''), title = 'TITAN Plots')
 
 fn <- arguments$args[1]
 Data <- data.frame(loadAlleleCounts(fn, header = F, genomeStyle = opt$genomeStyle), stringsAsFactors = F)
@@ -155,7 +150,6 @@ outputModelParameters(convergeParams, results, fn)
 norm <- convergeParams$n[length(convergeParams$n)]
 ploidy <- convergeParams$phi[length(convergeParams$phi)]
 
-#library(SNPchip)  ## use this library to plot chromosome idiogram (optional)
 outplot <- paste(opt$plotPrefix, '.titan.png', sep = '')
 png(outplot,width=1200,height=1000,res=100, type = 'cairo-png')
 if (opt$numClusters <= 2) { 
@@ -163,36 +157,34 @@ if (opt$numClusters <= 2) {
 } else {
     par(mfrow=c(3,1))
 }
-plotCNlogRByChr(results, chr = NULL, ploidy=ploidy, geneAnnot=NULL, spacing=4,ylim=c(-2,2),cex=0.5)
+plotCNlogRByChr(results, chr = NULL, ploidy=ploidy, normal=tail(convergeParams$n,1), geneAnnot=NULL, spacing=4,ylim=c(-2,2),cex=0.5)
 plotAllelicRatio(results, chr = NULL, geneAnnot=NULL, spacing=4, ylim=c(0,1),cex=0.5)
 plotClonalFrequency(results, chr = NULL, normal=tail(convergeParams$n,1), geneAnnot=NULL, spacing=4,ylim=c(0,1),cex=0.5)
 if (opt$numClusters <= 2){ 
     plotSubcloneProfiles(results, chr = NULL, cex = 2, spacing=6)
 }
-#pI <- plotIdiogram(chr,build="hg19",unit="bp",label.y=-4.25,new=FALSE,ylim=c(-2,-1))
+
 null <- dev.off()
 
 for (chr in intersect(results$Chr, chroms)) {
     outplot <- paste(opt$plotPrefix, '.titan.', chr, ".png", sep = '')
-    #hwriteImage(basename(outplot), pg, br = T)
     png(outplot,width=1200,height=1000,res=100, type = 'cairo-png')
     if (opt$numClusters <= 2) { 
         par(mfrow=c(4,1))
     } else {
         par(mfrow=c(3,1))
     }
-    plotCNlogRByChr(results, chr, ploidy=ploidy, geneAnnot=NULL, spacing=4,ylim=c(-2,2),cex=0.5,main=  chr)
+    plotCNlogRByChr(results, chr, ploidy=ploidy, normal=tail(convergeParams$n,1), geneAnnot=NULL, spacing=4,ylim=c(-2,2),cex=0.5,main=  chr)
     plotAllelicRatio(results, chr, geneAnnot=NULL, spacing=4, ylim=c(0,1),cex=0.5,main= chr)
     plotClonalFrequency(results, chr, normal=tail(convergeParams$n,1), geneAnnot=NULL, spacing=4,ylim=c(0,1),cex=0.5,main= chr)
     if (opt$numClusters <= 2){ 
         plotSubcloneProfiles(results, chr, cex = 2, spacing=6, main=chr)
     }
-    #pI <- plotIdiogram(chr,build="hg19",unit="bp",label.y=-4.25,new=FALSE,ylim=c(-2,-1))
+
     null <- dev.off()
 }
-
-#closePage(pg)
 
 fn <- paste(opt$outPrefix, '.titan.Rdata', sep = '')
 save(Data, results, convergeParams, optimalPath, file = fn)
 
+##JBH
