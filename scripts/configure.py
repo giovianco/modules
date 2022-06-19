@@ -1,13 +1,10 @@
 #!/usr/bin/env python
+
 from __future__ import print_function
 
 import yaml
 import argparse
 import collections
-
-""" convert yaml files to make include files
-"""
-
 
 def lowerBool(x):
     if isinstance(x, bool):
@@ -15,9 +12,8 @@ def lowerBool(x):
     else:
         return x
 
-
 def sample_yaml2mk(samples_file, out):
-    samples = yaml.load(open(args.samples_file, 'r'))
+    samples = yaml.safe_load(open(args.samples_file, 'r'))
 
     tumors = set()
     normals = set()
@@ -69,33 +65,31 @@ def sample_yaml2mk(samples_file, out):
 
     print("\n# set.normal = set", file=out)
     for normal, tumors in normal_tumors.items():
-        print("set.{normal} = {tumors} {normal}".format(normal=normal, tumors=" ".join(tumors)), file=out)
+        print("set.{normal} = {tumors}_{normal}".format(normal=normal, tumors="_".join(tumors)), file=out)
+
     print("\n# set.tumor = set", file=out)
     for tumor, normal in tumor_normal.items():
-        print("set.{tumor} = {tumors} {normal}".format(tumor=tumor, tumors=" ".join(normal_tumors[normal]),
-                                                       normal=normal), file=out)
+        print("set.{tumor} = {tumors}_{normal}".format(tumor=tumor, tumors="_".join(tumors), normal=normal), file=out)
+
     print("\n# set.pair = set", file=out)
     for tumor, normal in tumor_normal.items():
-        print("set.{tumor}_{normal} = {set}".format(tumor=tumor, normal=normal,
-                                                    set=" ".join(normal_tumors[normal])), file=out)
+        print("set.{tumor}_{normal} = {tumors}_{normal}".format(tumor=tumor, tumors="_".join(tumors), normal=normal), file=out)
 
     print("\n# set.set = set", file=out)
     for normal, tumors in normal_tumors.items():
         print("set.{tumors}_{normal} = {set}".format(tumors="_".join(tumors), normal=normal,
-                                                       set=" ".join(tumors + [normal])),
-              file=out)
+                                                       set="_".join(tumors + [normal])), file=out)
 
     print("\n# pairs.set = pairs", file=out)
     for normal, tumors in normal_tumors.items():
         print("pairs.{tumors}_{normal} = {pairs}".format(tumors="_".join(tumors), normal=normal,
                                                          pairs=" ".join(
-                                                             ["_".join([tumor, normal]) for tumor in tumors])),
-              file=out)
+                                                             ["_".join([tumor, normal]) for tumor in tumors])), file=out)
 
 
 def sample_attr_yaml2mk(sample_attr_file, out):
     print("\n# sample_attr_file", file=out)
-    sample_attr = yaml.load(open(sample_attr_file, 'r'))
+    sample_attr = yaml.safe_load(open(sample_attr_file, 'r'))
     for attr, m in sample_attr.items():
         for k, v in m.items():
             print("{}.{} = {}".format(attr, k, v), file=out)
@@ -103,7 +97,7 @@ def sample_attr_yaml2mk(sample_attr_file, out):
 
 def sample_fastq_yaml2mk(sample_fastq_file, out):
     print("\n# sample_fastq_file", file=out)
-    sample_fastq = yaml.load(open(sample_fastq_file, 'r'))
+    sample_fastq = yaml.safe_load(open(sample_fastq_file, 'r'))
     split_samples = set()
     for k, v in sample_fastq.items():
         for idx, fastq in enumerate(v):
@@ -122,7 +116,7 @@ def sample_fastq_yaml2mk(sample_fastq_file, out):
 
 def sample_merge_yaml2mk(sample_merge_file, out):
     print("\n# sample_merge_file", file=out)
-    sample_merge = yaml.load(open(args.sample_merge_file, 'r'))
+    sample_merge = yaml.safe_load(open(args.sample_merge_file, 'r'))
     print("MERGE_SAMPLES = {}".format(" ".join(list(sample_merge.keys()))), file=out)
     for k, v in sample_merge.items():
         print("merge.{} = {}".format(k, " ".join(v)), file=out)
@@ -134,7 +128,6 @@ if __name__ == '__main__':
     parser.add_argument('--project_config_file', help='project yaml config file',
                         default='project_config.yaml')
     parser.add_argument('--samples_file', help='yaml samples file', default='samples.yaml')
-    parser.add_argument('--sample_attr_file', help='yaml sample attr file', default='sample_attr.yaml')
     parser.add_argument('--sample_fastq_file', help='yaml sample fastq file mappings', default='sample.fastq.yaml')
     parser.add_argument('--sample_merge_file', help='yaml sample merge mappings')
     parser.add_argument('--out_file', help='project make include file', nargs='?', default='project_config.inc')
@@ -142,7 +135,7 @@ if __name__ == '__main__':
 
     of = open(args.out_file, 'w')
 
-    config = yaml.load(open(args.project_config_file, 'r'))
+    config = yaml.safe_load(open(args.project_config_file, 'r'))
     for k, v in config.items():
         print("{} = {}".format(k.upper(), lowerBool(v)), file=of)
 
@@ -150,11 +143,6 @@ if __name__ == '__main__':
         sample_yaml2mk(args.samples_file, of)
     except IOError:
         print("Error loading {}, skipping".format(args.samples_file))
-
-    try:
-        sample_attr_yaml2mk(args.sample_attr_file, of)
-    except:
-        print("Error loading {}, skipping".format(args.sample_attr_file))
 
     if args.sample_fastq_file is not None:
         try:
@@ -169,3 +157,5 @@ if __name__ == '__main__':
             print("Error loading {}, skipping.".format(args.sample_merge_file))
 
     of.close()
+    
+    ## JBH
